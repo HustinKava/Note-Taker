@@ -34,12 +34,37 @@ app.post('/api/notes', (req, res) => {
     // Pushing the new note to the notes variable
     notes.push(newNote);
 
+    // Calling the assign id function
+    assignID();
+
     // Writing the post to db.json file, converting the notes variable to a string
     fs.writeFile(path.join(__dirname, "db/db.json"), JSON.stringify(notes), (err) => {
 
         (err) ? console.error(err): res.json(notes);
     })
-})
+});
+
+// Creating a function that itterates through the notes.length and creates an id
+const assignID = () => {
+    for (i = 0; i < notes.length; i++) {
+        notes[i].id = i + 1;
+        // console.log(notes[i])
+    }
+};
+
+// Deleting a note
+app.delete('/api/notes/:id', function(req, res) {
+
+    // Using the filter method to only include notes that have id's that don't match the deleted id
+    notes = notes.filter(x => x.id != req.params.id)
+
+    // Then I rebuild the db.json file
+    fs.writeFile(path.join(__dirname, "db/db.json"), JSON.stringify(notes), (err) => {
+
+        (err) ? console.error(err): res.json(notes);
+    });
+
+});
 
 
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`))
