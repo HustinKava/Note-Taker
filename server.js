@@ -19,10 +19,27 @@ app.get('/', (req, res) => res.sendFile(path.join(__dirname, '/public/index.html
 // Basic route that sends the user to the second page
 app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, '/public/notes.html')));
 
-// Reading the notes in db.json file
-app.get('/api/notes', (req, res) => fs.readFile(path.join(__dirname, '/db/db.json'), 'utf8', (err, data) => {
-    // If there is no error it will send back the body as json and then parses the data
-    (err) ? console.error(err): res.json(JSON.parse(data));
-}));
+// Reading the dj.json file and returning notes as JSON format
+let notes = JSON.parse(fs.readFileSync('./db/db.json', 'utf8'));
+
+// Displaying all saved notes
+app.get("/api/notes", (req, res) => { return res.json(notes) });
+
+// Submiting a note
+app.post('/api/notes', (req, res) => {
+
+    // Storing the content posted into newNote variable
+    const newNote = req.body;
+
+    // Pushing the new note to the notes variable
+    notes.push(newNote);
+
+    // Writing the post to db.json file, converting the notes variable to a string
+    fs.writeFile(path.join(__dirname, "db/db.json"), JSON.stringify(notes), (err) => {
+
+        (err) ? console.error(err): res.json(notes);
+    })
+})
+
 
 app.listen(PORT, () => console.log(`App listening on PORT ${PORT}`))
